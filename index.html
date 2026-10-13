@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pausa CiberWeek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #ffffff;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Usando a imagem correta do repositório */
+            background-image: url('https://raw.githubusercontent.com/gilnei-ship-it/CiberWeek/main/WhatsApp%20Image%202026-09-28%20at%2008.51.21.jpeg');
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+        }
+
+        /* Camada escura para dar contraste ao texto sem esconder a imagem */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45); 
+            z-index: 1;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* Fica acima do overlay, mas abaixo do texto */
+            pointer-events: none;
+        }
+
+        .carousel-container {
+            position: relative;
+            z-index: 10; /* Fica no topo de tudo */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 1.5s ease-in-out, transform 1.5s ease-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 2.5rem;
+            letter-spacing: 0.05em;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8); /* Sombra para garantir leitura */
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="carousel-container">
+        <div class="slide active">
+            <h1>Voltamos em instantes</h1>
+        </div>
+        <div class="slide">
+            <h1>Pausa para o café</h1>
+        </div>
+        <div class="slide">
+            <h1>Aguarde um momento</h1>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray = [];
+        let canvasWidth = window.innerWidth;
+        let canvasHeight = window.innerHeight;
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        window.addEventListener('resize', () => {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            initParticles();
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvasWidth;
+                this.y = Math.random() * canvasHeight;
+                this.size = Math.random() * 1.5 + 0.5; // Partículas pequenas
+                this.speedX = (Math.random() - 0.5) * 0.3; // Movimento bem lento
+                this.speedY = (Math.random() - 0.5) * 0.3;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvasWidth || this.x < 0) this.speedX *= -1;
+                if (this.y > canvasHeight || this.y < 0) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; // Partículas sutis
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvasWidth * canvasHeight) / 12000;
+            if (numberOfParticles > 90) numberOfParticles = 90; // Limite para não poluir a tela
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            let maxDistance = 120; 
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let dx = particlesArray[a].x - particlesArray[b].x;
+                    let dy = particlesArray[a].y - particlesArray[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        // Linhas muito suaves (máximo 0.15 de opacidade)
+                        let opacity = (1 - (distance / maxDistance)) * 0.15;
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        // Configuração do Carrossel de Texto
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        setInterval(nextSlide, 5000); // Troca a cada 5 segundos
+    </script>
+</body>
+</html>
