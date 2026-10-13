@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pausa CiberWeek</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         body, html {
@@ -14,9 +16,32 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Figtree', sans-serif;
             background-color: #000;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
             color: #ffffff;
+            letter-spacing: 0.01em;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            margin: 0 0 8px 0;
+            color: #f0f0f0;
+        }
+
+        .content {
+            font-size: 14px;
+            font-weight: 300;
+            color: #cccccc;
+            margin: 0;
         }
 
         .bg-image {
@@ -25,22 +50,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Usando a imagem correta do repositório */
             background-image: url('https://raw.githubusercontent.com/gilnei-ship-it/CiberWeek/main/WhatsApp%20Image%202026-09-28%20at%2008.51.21.jpeg');
             background-size: cover;
             background-position: center;
             z-index: 0;
-        }
-
-        /* Camada escura para dar contraste ao texto sem esconder a imagem */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45); 
-            z-index: 1;
         }
 
         #particle-canvas {
@@ -49,62 +62,65 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2; /* Fica acima do overlay, mas abaixo do texto */
+            z-index: 1; /* Partículas ficam atrás do cartão de vidro */
             pointer-events: none;
         }
 
-        .carousel-container {
-            position: relative;
-            z-index: 10; /* Fica no topo de tudo */
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .glass-card {
+            position: absolute;
+            right: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: rgba(10, 15, 30, 0.4);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            
+            /* Usando Grid para sobrepor as telas (slides) suavemente */
+            display: grid;
+            min-width: 320px;
+            text-align: center;
         }
 
         .slide {
-            position: absolute;
-            text-align: center;
+            grid-area: 1 / 1;
             opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 1.5s ease-in-out, transform 1.5s ease-out;
+            transform: translateY(15px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            pointer-events: none;
         }
 
         .slide.active {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        h1 {
-            font-weight: 300;
-            font-size: 2.5rem;
-            letter-spacing: 0.05em;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.8); /* Sombra para garantir leitura */
-        }
-
-        @media (min-width: 768px) {
-            h1 {
-                font-size: 4rem;
-            }
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
 
     <div class="bg-image"></div>
-    <div class="overlay"></div>
     <canvas id="particle-canvas"></canvas>
 
-    <div class="carousel-container">
+    <div class="glass-card">
+        <!-- Tela 1 -->
         <div class="slide active">
-            <h1>Voltamos em instantes</h1>
+            <h1 class="title">Voltamos em instantes</h1>
+            <p class="subtitle">Estamos preparando tudo para você.</p>
         </div>
+        <!-- Tela 2 -->
         <div class="slide">
-            <h1>Pausa para o café</h1>
+            <h1 class="title">Pausa para o café</h1>
+            <p class="subtitle">Aproveite para recarregar as energias.</p>
         </div>
+        <!-- Tela 3 -->
         <div class="slide">
-            <h1>Aguarde um momento</h1>
+            <h1 class="title">Fique ligado</h1>
+            <p class="subtitle">Logo retornaremos com a programação.</p>
         </div>
     </div>
 
@@ -127,13 +143,16 @@
             initParticles();
         });
 
+        const colors = ['#FF6B00', '#00D2FF'];
+
         class Particle {
             constructor() {
                 this.x = Math.random() * canvasWidth;
                 this.y = Math.random() * canvasHeight;
-                this.size = Math.random() * 1.5 + 0.5; // Partículas pequenas
-                this.speedX = (Math.random() - 0.5) * 0.3; // Movimento bem lento
-                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.speedY = (Math.random() - 0.5) * 0.8;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
             }
 
             update() {
@@ -147,15 +166,24 @@
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; // Partículas sutis
+                ctx.fillStyle = this.color;
+                
+                // Efeito Glow (Brilho)
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                
                 ctx.fill();
+                
+                // Resetando sombra para a linha de conexão
+                ctx.shadowBlur = 0; 
             }
         }
 
         function initParticles() {
             particlesArray = [];
-            let numberOfParticles = (canvasWidth * canvasHeight) / 12000;
-            if (numberOfParticles > 90) numberOfParticles = 90; // Limite para não poluir a tela
+            // Densidade de partículas calculada pela área
+            let numberOfParticles = (canvasWidth * canvasHeight) / 11000;
+            if (numberOfParticles > 90) numberOfParticles = 90; // Limite para performance
 
             for (let i = 0; i < numberOfParticles; i++) {
                 particlesArray.push(new Particle());
@@ -163,7 +191,7 @@
         }
 
         function connectParticles() {
-            let maxDistance = 120; 
+            let maxDistance = 140; 
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
                     let dx = particlesArray[a].x - particlesArray[b].x;
@@ -171,8 +199,7 @@
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance < maxDistance) {
-                        // Linhas muito suaves (máximo 0.15 de opacidade)
-                        let opacity = (1 - (distance / maxDistance)) * 0.15;
+                        let opacity = (1 - (distance / maxDistance)) * 0.25;
                         ctx.beginPath();
                         ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
                         ctx.lineWidth = 0.5;
@@ -197,17 +224,15 @@
         initParticles();
         animateParticles();
 
-        // Configuração do Carrossel de Texto
         const slides = document.querySelectorAll('.slide');
         let currentSlide = 0;
 
-        function nextSlide() {
+        // Avança o slide invisivelmente ao clicar em qualquer lugar da página
+        document.body.addEventListener('click', () => {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
             slides[currentSlide].classList.add('active');
-        }
-
-        setInterval(nextSlide, 5000); // Troca a cada 5 segundos
+        });
     </script>
 </body>
 </html>
