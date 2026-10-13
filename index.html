@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pausa CiberWeek</title>
+    <title>Pausa CiberWeek - Neural Net</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
@@ -17,31 +21,10 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Figtree', sans-serif;
-            background-color: #000;
+            background-color: #050508;
             cursor: pointer;
             user-select: none;
-        }
-
-        .title {
-            font-size: 31px;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-            color: #ffffff;
-            letter-spacing: 0.01em;
-        }
-
-        .subtitle {
-            font-size: 18px;
-            font-weight: 400;
-            margin: 0 0 8px 0;
-            color: #f0f0f0;
-        }
-
-        .content {
-            font-size: 14px;
-            font-weight: 300;
-            color: #cccccc;
-            margin: 0;
+            -webkit-user-select: none;
         }
 
         .bg-image {
@@ -62,42 +45,68 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1; /* Partículas ficam atrás do cartão de vidro */
+            z-index: 1;
             pointer-events: none;
         }
 
-        .glass-card {
+        .glass-container {
             position: absolute;
-            right: 8%;
-            top: 50%;
-            transform: translateY(-50%);
+            bottom: 8%;
+            right: 5%;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            background: rgba(10, 15, 30, 0.4);
-            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
             z-index: 10;
             
-            /* Usando Grid para sobrepor as telas (slides) suavemente */
-            display: grid;
-            min-width: 320px;
-            text-align: center;
+            /* Define a base do contêiner para as transições absolutas funcionarem perfeitamente */
+            min-width: 380px;
+            min-height: 160px; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
         }
 
         .slide {
-            grid-area: 1 / 1;
+            position: absolute;
+            left: 40px; /* Respeitando o padding do container */
+            right: 40px;
             opacity: 0;
-            transform: translateY(15px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-out;
             pointer-events: none;
+            text-align: left;
         }
 
         .slide.active {
             opacity: 1;
             transform: translateY(0);
             pointer-events: auto;
+        }
+
+        .title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-weight: 400;
+            margin: 0 0 8px 0;
+            color: #e0e0e0;
+        }
+
+        .content {
+            font-size: 14px;
+            font-weight: 300;
+            color: #b0b0b0;
+            margin: 0;
+            letter-spacing: 0.02em;
         }
     </style>
 </head>
@@ -106,21 +115,23 @@
     <div class="bg-image"></div>
     <canvas id="particle-canvas"></canvas>
 
-    <div class="glass-card">
+    <div class="glass-container">
         <!-- Tela 1 -->
         <div class="slide active">
             <h1 class="title">Voltamos em instantes</h1>
-            <p class="subtitle">Estamos preparando tudo para você.</p>
+            <p class="subtitle">Estamos preparando a próxima etapa.</p>
         </div>
         <!-- Tela 2 -->
         <div class="slide">
             <h1 class="title">Pausa para o café</h1>
             <p class="subtitle">Aproveite para recarregar as energias.</p>
+            <p class="content">Networking também faz parte do evento.</p>
         </div>
         <!-- Tela 3 -->
         <div class="slide">
-            <h1 class="title">Fique ligado</h1>
-            <p class="subtitle">Logo retornaremos com a programação.</p>
+            <h1 class="title">Quase prontos...</h1>
+            <p class="subtitle">Os sistemas estão sendo atualizados.</p>
+            <p class="content">Acomode-se, já vamos recomeçar.</p>
         </div>
     </div>
 
@@ -143,22 +154,25 @@
             initParticles();
         });
 
-        const colors = ['#FF6B00', '#00D2FF'];
-
         class Particle {
             constructor() {
                 this.x = Math.random() * canvasWidth;
                 this.y = Math.random() * canvasHeight;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = (Math.random() - 0.5) * 0.8;
-                this.speedY = (Math.random() - 0.5) * 0.8;
-                this.color = colors[Math.floor(Math.random() * colors.length)];
+                // Tamanho sutil (1 a 2px)
+                this.size = Math.random() * 1 + 1; 
+                // Movimento muito lento e contínuo
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                // Cores sutis, alinhadas à paleta de tecnologia (branco azulado/laranja bem suave)
+                const isOrange = Math.random() > 0.8;
+                this.color = isOrange ? 'rgba(255, 130, 0, 0.6)' : 'rgba(180, 220, 255, 0.6)';
             }
 
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
 
+                // Rebater nas bordas suavemente
                 if (this.x > canvasWidth || this.x < 0) this.speedX *= -1;
                 if (this.y > canvasHeight || this.y < 0) this.speedY *= -1;
             }
@@ -167,23 +181,14 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fillStyle = this.color;
-                
-                // Efeito Glow (Brilho)
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = this.color;
-                
                 ctx.fill();
-                
-                // Resetando sombra para a linha de conexão
-                ctx.shadowBlur = 0; 
             }
         }
 
         function initParticles() {
             particlesArray = [];
-            // Densidade de partículas calculada pela área
-            let numberOfParticles = (canvasWidth * canvasHeight) / 11000;
-            if (numberOfParticles > 90) numberOfParticles = 90; // Limite para performance
+            // Máximo absoluto de 40 partículas para não poluir visualmente
+            const numberOfParticles = Math.min(40, Math.floor((canvasWidth * canvasHeight) / 25000));
 
             for (let i = 0; i < numberOfParticles; i++) {
                 particlesArray.push(new Particle());
@@ -191,7 +196,7 @@
         }
 
         function connectParticles() {
-            let maxDistance = 140; 
+            const maxDistance = 120; 
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
                     let dx = particlesArray[a].x - particlesArray[b].x;
@@ -199,9 +204,10 @@
                     let distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance < maxDistance) {
-                        let opacity = (1 - (distance / maxDistance)) * 0.25;
+                        // Opacidade máxima de 0.15 para linhas bem discretas
+                        let opacity = (1 - (distance / maxDistance)) * 0.15;
                         ctx.beginPath();
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+                        ctx.strokeStyle = `rgba(200, 220, 255, ${opacity})`;
                         ctx.lineWidth = 0.5;
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
@@ -224,10 +230,10 @@
         initParticles();
         animateParticles();
 
+        // Lógica de navegação de slides
         const slides = document.querySelectorAll('.slide');
         let currentSlide = 0;
 
-        // Avança o slide invisivelmente ao clicar em qualquer lugar da página
         document.body.addEventListener('click', () => {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
